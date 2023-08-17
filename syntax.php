@@ -11,7 +11,6 @@
 if(!defined('DOKU_INC')) die();
 
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-require_once(DOKU_PLUGIN.'syntax.php');
 
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
@@ -25,8 +24,14 @@ class syntax_plugin_iframeinterwiki extends DokuWiki_Syntax_Plugin {
 
 	function handle($match, $state, $pos, Doku_Handler $handler){
 		$match = substr($match, 6, -2);
-		list($url, $alt) = explode('|',$match,2);
-		list($url, $param) = explode(' ',$url,2);
+		
+		$exploded = explode('|', $match, 2);
+		$url = isset($exploded[0]) ? $exploded[0] : '';
+		$alt = isset($exploded[1]) ? $exploded[1] : '';
+
+		$explodedUrl = explode(' ', $url, 2);
+		$url = isset($explodedUrl[0]) ? $explodedUrl[0] : '';
+		$param = isset($explodedUrl[1]) ? $explodedUrl[1] : '';
 
 		// javascript pseudo uris allowed?
 		if (!$this->getConf('js_ok') && substr($url,0,11) == 'javascript:'){
@@ -76,20 +81,21 @@ class syntax_plugin_iframeinterwiki extends DokuWiki_Syntax_Plugin {
 
 	// Replace on url all match from interwiki conf
 	function parse_uri_inter($url, $filename) {
-		$file = fopen($filename, 'r');
-		while (($line = fgets($file)) !== false) {
-			$line = preg_replace("/\#.+/", '', trim($line));
-			preg_match("/^\s*?(.+?)\s+(.+?)$/i", $line, $matches);
-			if (isset($matches[1], $matches[2]) && strpos($url, $matches[1]) !== false) {
-				$url = str_replace($matches[1] . '>', '@REPLACE@', $url);
-				if(strpos($matches[2], '{NAME}') !== false) {
-					$url = str_replace('@REPLACE@' , str_replace('{NAME}', '', $matches[2]), $url);
-				} else if(strpos($matches[2], '{URL}') !== false) {
-					$url = str_replace('%40REPLACE%40', str_replace('{URL}', '', $matches[2]), urlencode($url));
+		if ( file_exists($filename) && ($file = fopen($filename, "r"))!==false ) {
+			while (($line = fgets($file)) !== false) {
+				$line = preg_replace("/\#.+/", '', trim($line));
+				preg_match("/^\s*?(.+?)\s+(.+?)$/i", $line, $matches);
+				if (isset($matches[1], $matches[2]) && strpos($url, $matches[1]) !== false) {
+					$url = str_replace($matches[1] . '>', '@REPLACE@', $url);
+					if(strpos($matches[2], '{NAME}') !== false) {
+						$url = str_replace('@REPLACE@' , str_replace('{NAME}', '', $matches[2]), $url);
+					} else if(strpos($matches[2], '{URL}') !== false) {
+						$url = str_replace('%40REPLACE%40', str_replace('{URL}', '', $matches[2]), urlencode($url));
+					}
 				}
 			}
+			fclose($file);
 		}
-		fclose($file);
 		return $url;
 	}
 
