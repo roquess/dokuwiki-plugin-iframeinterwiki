@@ -52,13 +52,13 @@ class syntax_plugin_iframeinterwiki extends DokuWiki_Syntax_Plugin {
 		// handle size parameters
 		$matches=array();
 		if(preg_match('/\[?(\d+(em|%|pt|px)?)\s*([,xX]\s*(\d+(em|%|pt|px)?))?\]?/',$param,$matches)){
-			if($matches[4]){
+			if(array_key_exists(4, $matches) && $matches[4]){
 				// width and height was given
 				$opts['width'] = $matches[1];
 				if(!$matches[2]) $opts['width'] .= 'px'; //default to pixel when no unit was set
 				$opts['height'] = $matches[4];
 				if(!$matches[5]) $opts['height'] .= 'px'; //default to pixel when no unit was set
-			}elseif($matches[2]){
+			}elseif(array_key_exists(2, $matches) && $matches[2]){
 				// only height was given
 				$opts['height'] = $matches[1];
 				if(!$matches[2]) $opts['height'] .= 'px'; //default to pixel when no unit was set
