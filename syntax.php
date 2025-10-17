@@ -85,7 +85,7 @@ class syntax_plugin_iframeinterwiki extends DokuWiki_Syntax_Plugin {
 			while (($line = fgets($file)) !== false) {
 				$line = preg_replace("/\#.+/", '', trim($line));
 				preg_match("/^\s*?(.+?)\s+(.+?)$/i", $line, $matches);
-				if (isset($matches[1], $matches[2]) && strpos($url, $matches[1]) !== false) {
+				if (isset($matches[1], $matches[2]) && strpos($url, $matches[1] . '>') !== false) {
 					$url = str_replace($matches[1] . '>', '@REPLACE@', $url);
 					if(strpos($matches[2], '{NAME}') !== false) {
 						$url = str_replace('@REPLACE@' , str_replace('{NAME}', '', $matches[2]), $url);
